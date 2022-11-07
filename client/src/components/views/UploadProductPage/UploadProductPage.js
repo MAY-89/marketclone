@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Typography, Button, Form, Input } from "antd";
 import FileUpload from "../../utils/FileUpload";
+import Axios from "axios";
 
 const { TextArea } = Input;
 const Constinents =[
@@ -13,7 +14,7 @@ const Constinents =[
 	{key:7, value:"Antarctica"},
 ]
 
-function UploadProductPage() {
+function UploadProductPage(props) {
   const [Title, setTitle] = useState("");
   const [Description, setDescription] = useState("");
   const [Price, setPrice] = useState("");
@@ -32,15 +33,49 @@ function UploadProductPage() {
   const continenChangetHandler = (e) => {
     setContinent(e.currentTarget.value);
   };
+  const updateImages = (newImages) => {
+    setImages(newImages);
+  };
+  const submitHandler = (event) =>{
+    event.preventDefault();
+
+    if(!Title || !Description || !Price || !Continent || !Images){
+      return alert("모든 값을 입력 해야 합니다.");
+    }
+
+    const body = {
+      writer : props.user.userData._id,
+      title : Title,
+      description: Description,
+      price: Price,
+      images: Images,
+      constinents: Constinents
+    }
+    Axios.post("/api/product", body).then(response =>{
+      if(response.data.success){
+        alert("상품 업로드에 성공함");
+        // props를 받아서 router 초기 화면으로 이동함
+        console.log("프롭스" + props)
+        console.log(props)
+        props.history.push('/');
+      }else{
+        alert("상품 업로드 실패");
+        console.log("프롭스" + props)
+        console.log(props)
+      }
+
+    });
+
+  }
 
   return (
     <div style={{ maxWidth: "700px", margin: "2rem auto" }}>
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
         <h2 level={2}>여행상품 업로드</h2>
       </div>
-      <form>
+      <form onSubmit={submitHandler}>
         {/* DropZone */}
-				<FileUpload/>
+				<FileUpload refreshFunction={updateImages} />
         <br />
         <br />
         <label>이름</label>
