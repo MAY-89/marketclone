@@ -63,9 +63,7 @@ function UploadProductPage(props) {
         console.log("프롭스" + props)
         console.log(props)
       }
-
     });
-
   }
 
   return (
