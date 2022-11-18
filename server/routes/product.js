@@ -47,10 +47,20 @@ router.post("/products", (req, res) => {
 
   let limit = req.body.limit ? parseInt(req.body.limit) : 20;
   let skip = req.body.skip ? parseInt(req.body.skip) : 0;
+  
+  let findArgs = {};
+
+  for(let key in req.body.filters){
+    if(req.body.filters[key].length > 0){
+
+      findArgs[key] = req.body.filters[key];
+
+    }
+  }
 
   // DB에 있는 모든 Product 가져오기
   // populate 누가 등록 했는지 확인 하기
-  Product.find()
+  Product.find(findArgs)
   .populate("writer")
   .skip(skip)
   .limit(limit)
