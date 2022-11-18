@@ -6,11 +6,11 @@ import Axios from "axios";
 const { TextArea } = Input;
 const Constinents =[
 	{key:1, value:"Africa"},
-	{key:2, value:"Asia"},
-	{key:3, value:"Europe"},
-	{key:4, value:"Australia"},
-	{key:5, value:"North America"},
-	{key:6, value:"South America"},
+  {key:2, value:"Europe"},
+	{key:3, value:"Asia"},
+	{key:4, value:"North America"},
+	{key:5, value:"South America"},
+  {key:6, value:"Australia"},
 	{key:7, value:"Antarctica"},
 ]
 
