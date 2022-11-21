@@ -6,11 +6,14 @@ import ImageSlider from "../../utils/ImageSlider";
 import CheckBox from "./Sections/CheckBox";
 import { continents, price } from "./Sections/Datas";
 import RadioBox from "./Sections/RadioBox";
+import SearchFeature from "./Sections/SearchFeature";
+
 function LandingPage() {
   const [Product, setProduct] = useState([]);
   const [Skip, setSkip] = useState(0);
   const [Limit, setLimit] = useState(4);
   const [PostSize, setPostSize] = useState(0);
+  const [SearchTerm, setSearchTerm] = useState("");
   const [Filters, setFilters] = useState({
     continents: [],
     price: [],
@@ -74,26 +77,25 @@ function LandingPage() {
     setSkip(0);
   };
 
-  const handlePrice = (value) =>{
-
+  const handlePrice = (value) => {
     const data = price;
     let array = [];
 
-    for(let key in data){ 
-      if(data[key]._id === parseInt(value,10)){
-        array = data[key].array
-      } 
+    for (let key in data) {
+      if (data[key]._id === parseInt(value, 10)) {
+        array = data[key].array;
+      }
     }
 
-    return array;    
-  }
-  
+    return array;
+  };
+
   const handleFilters = (filters, category) => {
     const newFilters = { ...Filters };
 
     newFilters[category] = filters;
 
-    if(category === 'price'){
+    if (category === "price") {
       let priceValue = handlePrice(filters);
       newFilters[category] = priceValue;
     }
@@ -102,6 +104,21 @@ function LandingPage() {
     // Filter의 상태를 계속 유지 시켜 주도록 한다.
     setFilters(newFilters);
   };
+
+  const updateSearchTerm = (newSearchTerm) => {
+
+    let body = {
+      skip : 0,
+      limit : Limit,
+      filters: Filters,
+      searchTerm : newSearchTerm
+    }
+    setSkip(0);
+    setSearchTerm(newSearchTerm);
+    getProduct(body);
+
+    // getProduct(body);
+  }
 
   return (
     <div style={{ width: "75%", margin: "3rem auto" }}>
@@ -114,7 +131,7 @@ function LandingPage() {
       <div>
         {/* Filter */}
         <Row gutter={[16, 16]}>
-          <Col lg={12}  xs={24}>
+          <Col lg={12} xs={24}>
             {/* CheckBox */}
             <CheckBox
               list={continents}
@@ -123,22 +140,35 @@ function LandingPage() {
           </Col>
           <Col lg={12} xs={24}>
             {/* RadioBox */}
-            <RadioBox list = {price} handleFilters={(filters) => handleFilters(filters, "price")}>
-
-            </RadioBox>
+            <RadioBox
+              list={price}
+              handleFilters={(filters) => handleFilters(filters, "price")}
+            />
           </Col>
         </Row>
+        <Row>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              margin: "1rem auto",
+            }}
+          >
+            <SearchFeature 
+              refreshFunction = {updateSearchTerm}
+            />
+          </div>
+        </Row>
+        {/* gutter는 여백을 주는데 [] */}
+        <Row gutter={[16, 16]}>{renderCards}</Row>
+
+        <br />
+        {PostSize >= Limit && (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <button onClick={loadMoreHandler}>더보기</button>
+          </div>
+        )}
       </div>
-
-      {/* gutter는 여백을 주는데 [] */}
-      <Row gutter={[16, 16]}>{renderCards}</Row>
-
-      <br />
-      {PostSize >= Limit && (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <button onClick={loadMoreHandler}>더보기</button>
-        </div>
-      )}
     </div>
   );
 }
