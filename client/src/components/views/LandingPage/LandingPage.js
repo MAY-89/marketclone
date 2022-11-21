@@ -58,7 +58,8 @@ function LandingPage() {
   const renderCards = Product.map((product, index) => {
     return (
       <Col lg={6} md={8} xs={24} key={index}>
-        <Card cover={<ImageSlider images={product.images} />}>
+        <Card cover={<a href={`/product/${product._id}`}>
+          <ImageSlider images={product.images} /></a>}>
           <Meta title={product.title} description={`$${product.price}`} />
         </Card>
       </Col>
@@ -106,19 +107,18 @@ function LandingPage() {
   };
 
   const updateSearchTerm = (newSearchTerm) => {
-
     let body = {
-      skip : 0,
-      limit : Limit,
+      skip: 0,
+      limit: Limit,
       filters: Filters,
-      searchTerm : newSearchTerm
-    }
+      searchTerm: newSearchTerm,
+    };
     setSkip(0);
     setSearchTerm(newSearchTerm);
     getProduct(body);
 
     // getProduct(body);
-  }
+  };
 
   return (
     <div style={{ width: "75%", margin: "3rem auto" }}>
@@ -154,9 +154,7 @@ function LandingPage() {
               margin: "1rem auto",
             }}
           >
-            <SearchFeature 
-              refreshFunction = {updateSearchTerm}
-            />
+            <SearchFeature refreshFunction={updateSearchTerm} />
           </div>
         </Row>
         {/* gutter는 여백을 주는데 [] */}

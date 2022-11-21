@@ -46,7 +46,7 @@ router.post("/", (req, res) => {
 router.post("/products", (req, res) => {
 
   let limit = req.body.limit ? parseInt(req.body.limit) : 20;
-  let term = req.body.searchTerm ? req.body.searchTerm : "";
+  let term = req.body.searchTerm;
   let skip = req.body.skip ? parseInt(req.body.skip) : 0;
   
   let findArgs = {};
@@ -90,5 +90,28 @@ router.post("/products", (req, res) => {
     })
   }
 });
+
+router.get('/products_by_id', (req, res) => {
+
+  console.log("type : " + req.query.type)
+// ProductId를 이용해서 DB를 검색함
+let type = req.query.type;  //get 은 req body임
+let productId = req.query.id;
+
+console.log(productId);
+console.log(type);
+Product.find({_id : productId})
+.populate('write')
+.exec((err, product) =>{
+  if(err) return res.status(400).send(err);
+
+  return res.status(200).send({success : true, product});
+})
+
+
+
+ 
+});
+// axios.get(`/api/product/products_by_id?${productId}$type=single`)
 
 module.exports = router;
