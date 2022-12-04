@@ -32,6 +32,15 @@ const userSchema = mongoose.Schema({
     },
     tokenExp :{
         type: Number
+    },
+    cart:{
+        type : Array,
+        default: []
+
+    },
+    history:{
+        type : Array,
+        default: []
     }
 })
 
