@@ -4,6 +4,7 @@ import {
   AUTH_USER,
   LOGOUT_USER,
   ADD_TO_CART,
+  Get_Cart_Items,
 } from "../_actions/types";
 
 export default function (state = {}, action) {
@@ -22,7 +23,10 @@ export default function (state = {}, action) {
             ...state.userData,
             cart: action.payload // users(route)에 있는 userInfo.cart가 payload에 들어오게 된다.
         }
+        
     };
+    case Get_Cart_Items:
+      return { ...state };
     default:
       return state;
   }

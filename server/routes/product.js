@@ -96,11 +96,17 @@ router.get('/products_by_id', (req, res) => {
   console.log("type : " + req.query.type)
 // ProductId를 이용해서 DB를 검색함
 let type = req.query.type;  //get 은 req body임
-let productId = req.query.id;
+let productIds = req.query.id;
 
-console.log(productId);
-console.log(type);
-Product.find({_id : productId})
+if(type == 'array'){
+  // id= 123,123,123 -> [123,123,123]
+  let ids = req.query.id.split(',');
+  productIds = ids.map(item =>{
+    return item;
+  })
+}
+
+Product.find({_id : {$in: productIds}})
 .populate('write')
 .exec((err, product) =>{
   if(err) return res.status(400).send(err);
