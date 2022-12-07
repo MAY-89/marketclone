@@ -19,7 +19,7 @@ router.get("/auth", auth, (req, res) => {
     role: req.user.role,
     image: req.user.image,
     cart: req.user.cart,
-    cart: req.user.history,
+    history: req.user.history,
   });
 });
 
@@ -73,48 +73,49 @@ router.get("/logout", auth, (req, res) => {
 
 router.post("/addToCart", auth, (req, res) => {
   // req.user 는 auth에 있는 user 정보를 바로 사용할수 있음
-  let duplicate = false;
+  
   User.findOne({ _id: req.user._id },
     // User Collection에 해당 유저의 정보를 가져옴
     (err, userInfo) => {
       // 가져온 정보에서 카트에다 넣으려고 하는 상품이 이미 들어 있는지 확인한다.
+      let duplicate = false;
       userInfo.cart.forEach((item) => {
         if (item.id == req.body.productId) {
           duplicate = true;
         }
+        if (duplicate == true) {
+          // 상품이 있을때 카운트 추가
+          User.findOneAndUpdate(
+            { _id: req.user._id, "cart.id": req.body.productId },
+            { $inc: { "cart.$.quantity": 1 } }, //increment : 증가
+            { new: true }, // 업데이트 후에 결과 값을 받기 위해서 true, 반대는 false
+            (err, userInfo) => {
+              if (err) return res.status(200).json({ success: false, err });
+      
+              return res.status(200).send(userInfo.cart);
+            });
+        } else {
+          // 상품이 없을때 새로이 추가
+          User.findOneAndUpdate(
+            { _id: req.user._id },
+            {
+              $push: {
+                cart: {
+                  id: req.body.productId,
+                  quantity: 1,
+                  data: Date.now(),
+                },
+              },
+            },
+            { new: true },
+            (err, userInfo) => {
+              if (err) return res.status(200).json({ success: false, err });
+              return res.status(200).send(userInfo.cart);
+            });
+        }
       });
     });
-  if (duplicate == true) {
-    // 상품이 있을때 카운트 추가
-    User.findOneAndUpdate(
-      { _id: req.user._id, "cart.id": req.body.productId },
-      { $inc: { "cart.$.quantity": 1 } }, //increment : 증가
-      { new: true }, // 업데이트 후에 결과 값을 받기 위해서 true, 반대는 false
-      (err, userInfo) => {
-        if (err) return res.status(200).json({ success: false, err });
-
-        return res.status(200).send(userInfo.cart);
-      });
-  } else {
-    // 상품이 없을때 새로이 추가
-    User.findOneAndUpdate(
-      { _id: req.user._id },
-      {
-        $push: {
-          cart: {
-            id: req.body.productId,
-            quantity: 1,
-            data: Date.now(),
-          },
-        },
-      },
-      { new: true },
-      (err, userInfo) => {
-        if (err) return res.status(200).json({ success: false, err });
-        console.log("dupl"+ userInfo)
-        return res.status(200).send(userInfo.cart);
-      });
-  }
+ 
 });
 
 module.exports = router;
