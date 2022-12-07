@@ -68,7 +68,7 @@ export function addToCart(id) {
 }
 export function getCartItems(cartItems, userCart) {
 
-  const request = axios.get(`/api/product/product_by_id?id=${cartItems}&type=array`)
+  const request = axios.get(`/api/product/products_by_id?id=${cartItems}&type=array`)
     .then((response) => {
       // CartItems에 해당하는 정보들을 Product Collection에서 가져옴
       
