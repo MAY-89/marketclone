@@ -5,6 +5,7 @@ import {
   LOGOUT_USER,
   ADD_TO_CART,
   GET_CART_ITEMS,
+  REMOVE_CART_ITEM,
 } from "../_actions/types";
 
 export default function (state = {}, action) {
@@ -18,14 +19,22 @@ export default function (state = {}, action) {
     case LOGOUT_USER:
       return { ...state };
     case ADD_TO_CART:
-      return { ...state,
-        userData:{
-            ...state.userData,
-            cart: action.payload // users(route)에 있는 userInfo.cart가 payload에 들어오게 된다.
-        }
-    };
+      return {
+        ...state,
+        userData: {
+          ...state.userData,
+          cart: action.payload, // users(route)에 있는 userInfo.cart가 payload에 들어오게 된다.
+        },
+      };
     case GET_CART_ITEMS:
-      return { ...state, cartDetail: action.payload};
+      return { ...state, cartDetail: action.payload };
+    case REMOVE_CART_ITEM:
+      return { ...state, cartDetail : action.payload.productInfo,
+      userData:{
+        ...state.userData,
+        cart : action.payload.cart
+      }
+      };
     default:
       return state;
   }
