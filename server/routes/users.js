@@ -74,7 +74,6 @@ router.get("/logout", auth, (req, res) => {
 
 router.post("/addToCart", auth, (req, res) => {
   // req.user 는 auth에 있는 user 정보를 바로 사용할수 있음
-  
   User.findOne({ _id: req.user._id },
     // User Collection에 해당 유저의 정보를 가져옴
     (err, userInfo) => {
@@ -84,6 +83,7 @@ router.post("/addToCart", auth, (req, res) => {
         if (item.id == req.body.productId) {
           duplicate = true;
         }
+      });
         if (duplicate == true) {
           // 상품이 있을때 카운트 추가
           User.findOneAndUpdate(
@@ -114,34 +114,38 @@ router.post("/addToCart", auth, (req, res) => {
               return res.status(200).send(userInfo.cart);
             });
         }
-      });
     });
 });
+
 router.get("/removeFromCart", auth, (req, res) => {
   // 카트 안의 지우고자 하는 상품을 삭제
   User.findOneAndUpdate(
     { _id: req.user._id },
     {
-      $pull: { cart: req.query.id },
+      "$pull": { cart: {"id": req.query.id }}
     },
     {new : true},
     (err, userInfo) => {
+      console.log("*******************");
+      console.log("cart : "+ userInfo.cart);
+      console.log("userInfo : "+ userInfo)
       let cart = userInfo.cart;
       let array = cart.map(item => {
         return item.id;
+      });
+
+    // product collection에서 현재 남아 있는 상품들의 정보를 가져오기
+      Product.find(
+        { _id: {$in: array}}
+      ).populate("writer")
+      .exec((err, productInfo) => {
+        console.log("productInfo : " + productInfo);
+        return res.status(200).json({
+          productInfo, cart
+        })
       })
     }
   );
-
-  // product collection에서 현재 남아 있는 상품들의 정보를 가져오기
-  Product.find(
-    {id: {$in: array}}
-  ).populate("writer")
-  .exec((err, productInfo) => {
-    return res.status(200).json({
-      productInfo, cart
-    })
-  })
 });
 
 module.exports = router;
