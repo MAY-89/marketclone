@@ -103,6 +103,8 @@ export function removeCartItem(productId) {
           }
         })
       })
+
+      return response.data;
     });
 
   return {
