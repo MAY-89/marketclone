@@ -61,7 +61,6 @@ function CartPage(props) {
     {ShowTotal ?
       <div style={{ marginTop: '3rem' }}>
         <h2>Total Amount: ${Total}</h2>
-        <Paypal />
       </div>
       :
       <>
@@ -72,8 +71,11 @@ function CartPage(props) {
       </div>
       </>
     }
-
-    
+    {ShowTotal &&
+    <Paypal 
+    total={Total}>
+      </Paypal>
+      }
     </div>
   );
 }
