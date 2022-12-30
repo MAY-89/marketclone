@@ -4,6 +4,10 @@ const { User } = require("../models/User");
 
 const { auth } = require("../middleware/auth");
 const { Product } = require("../models/Product");
+const { Payment } = require("../models/Payment");
+
+const async = require('async');
+
 
 //=================================
 //             User
@@ -161,7 +165,9 @@ router.post("/successBuy", auth, (req, res) => {
   let history = []
   let transactionData = {};
 
-  req.body.cartDetail.forEach((item =>{
+  // 1. userCollection안에 history안에 결제 정보 넣어주기
+
+  req.body.cartDetail.forEach(item =>{
     history.push({
       dataOfPurchase: Date.now(),
       name: item.title,
@@ -170,7 +176,69 @@ router.post("/successBuy", auth, (req, res) => {
       quantity: item.quantity,
       paymentId: req.body.paymentData.paymentId
     })
-  }))
+
+    // 2 Payment Collection 안에 자세한 결제 정보 넣어주기
+    transactionData.user = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email
+    }
+    transactionData.data = req.body.paymentData
+    transactionData.data = history
+
+    // history 정보 저장
+    User.findOneAndUpdate(
+      {_id: req.user._id},
+      { $push: { history: history},
+        $set: { cart: []}    },
+      { new : true},
+      (err, user) => {
+
+        if(err) return res.json({success: false, err})
+
+        // payment에다 transaction 정보 저장
+        const payment = new Payment(transactionData);
+        payment.save((err, doc) => {
+          if(err) return res.json({success: false, err})
+
+          // 3. Production Collection에 Sold Count 하기
+          // async를 왜 쓰냐?
+          // 현재 제품의 몇개?
+          let products = [];
+          doc.product.forEach(item =>{
+            products.push({id: item.id, quantity: item.quantity})
+          })
+          /**
+           * async
+           * 반복문을 돌려서 id를 찾고 그 아이디에 따라서 해야 되는 조건문 및 반복문을 작성한다.
+           * 아래와 같이 키 값을 입력 하면, 코드가 복잡해 지지 않고 간소화 되고 클린코드를 작성할수 있다.
+           */
+          async.eachSeries(products, (item, callback) => {
+
+            Product.update(
+              {_id: item.id}, // 키 값
+              { // 행위
+                $inc: {
+                  "sold": item.quantity
+                }
+              },
+              {new : false}, // 다시 리턴으로 값을 돌려 줄건지?
+              callback
+            )
+
+          }, (err) => {
+            if(err) return res.status(400).json({success: false, err})
+            res.status(200).json({
+              success : true,
+              cart : user.cart,
+              cartDetail: []
+            })
+          }
+          )
+        });
+      }
+    )
+  });
 });
 
 module.exports = router;
