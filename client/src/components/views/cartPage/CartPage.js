@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getCartItems, removeCartItem, onSuccessBuy } from "../../../_actions/user_actions";
 import UserCardBlock from "./sections/UserCardBlock";
-import { Empty } from 'antd';
+import { Empty, Result  } from 'antd';
 import  Paypal  from '../../utils/Paypal'
  
 function CartPage(props) {
@@ -10,6 +10,7 @@ function CartPage(props) {
   const dispatch = useDispatch();
   const [Total, setTotal] = useState(0);
   const [ShowTotal, setShowTotal] = useState(false);
+  const [ShowSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
     let cartItems = [];
@@ -56,7 +57,7 @@ function CartPage(props) {
     .then(response => {
       if(response.payload.success){
         setShowTotal(false);
-
+        setShowSuccess(true);
       }
     })
   }
@@ -68,13 +69,17 @@ function CartPage(props) {
       <div>
         {/* <UserCardBlock products= {props.user.cartDetail.product && props.user.cartDetail.product}></UserCardBlock> */}
         <UserCardBlock products={props.user.cartDetail} removeItem= {removeFromCart}></UserCardBlock>
-
       </div>
 
     {ShowTotal ?
       <div style={{ marginTop: '3rem' }}>
         <h2>Total Amount: ${Total}</h2>
       </div>
+      : ShowSuccess ?
+          <Result
+          status="success"
+          title="Successfully Purchased Items!"
+          />
       :
       <>
       <br/>
